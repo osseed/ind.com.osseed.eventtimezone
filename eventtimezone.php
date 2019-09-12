@@ -194,7 +194,8 @@ function eventtimezone_civicrm_alterContent(&$content, $context, $tplName, &$obj
       'return' => array("timezone"),
       'id' => $object->_id,
     ));
-    if (isset($result['values'][0])) {
+    $timezone = '';
+    if (isset($result['values']) && array_key_exists('timeZone',$result['values'][0])) {
       $timezone = $result['values'][0]['timezone'];
     }
 
@@ -253,7 +254,7 @@ function eventtimezone_civicrm_alterContent(&$content, $context, $tplName, &$obj
         $content = preg_replace('#(<td width="90%">)(.*?)(</td>)#si', $replacement, $content);
       }
     }
-    elseif (empty($event_end_date)) {
+    elseif ($timezone != '_none' && !empty($timezone && empty($event_end_date))) {
       $replacement = "<td width='90%'>" . $start_date_st . " " .  $timezone . "</td>";
       $content = preg_replace('#(<td width="90%">)(.*?)(</td>)#si', $replacement, $content);
     }
