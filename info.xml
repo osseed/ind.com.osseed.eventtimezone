@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<extension key="ind.com.osseed.eventtimezone" type="module">
+  <file>eventtimezone</file>
+  <name>Event Timezone</name>
+  <description>Show timezones while creating events</description>
+  <license>AGPL-3.0</license>
+  <maintainer>
+    <author>OSSeed</author>
+    <email>hello@osseed.com</email>
+  </maintainer>
+  <urls>
+    <url desc="Main Extension Page">https://github.com/osseed/ind.com.osseed.eventtimezone.git</url>
+    <url desc="Documentation">https://github.com/osseed/ind.com.osseed.eventtimezone/blob/master/README.txt</url>
+  </urls>
+  <releaseDate>2019-09-12</releaseDate>
+  <version>1.0</version>
+  <develStage>alpha</develStage>
+  <compatibility>
+    <ver>4.7</ver>
+  </compatibility>
+  <comments>Show timezones list while creating events</comments>
+  <civix>
+    <namespace>CRM/Eventtimezone</namespace>
+  </civix>
+</extension>
