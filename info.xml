@@ -12,11 +12,12 @@
     <url desc="Main Extension Page">https://github.com/osseed/ind.com.osseed.eventtimezone.git</url>
     <url desc="Documentation">https://github.com/osseed/ind.com.osseed.eventtimezone/blob/master/README.txt</url>
   </urls>
-  <releaseDate>2019-09-12</releaseDate>
-  <version>1.0</version>
+  <releaseDate>2020-11-02</releaseDate>
+  <version>1.1</version>
   <develStage>alpha</develStage>
   <compatibility>
     <ver>4.7</ver>
+    <ver>5.29</ver>
   </compatibility>
   <comments>Show timezones list while creating events</comments>
   <civix>
