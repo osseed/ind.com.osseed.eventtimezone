@@ -195,26 +195,45 @@ function eventtimezone_civicrm_alterContent(&$content, $context, $tplName, &$obj
       'id' => $object->_id,
     ));
     $timezone = '';
-    if (isset($result['values']) && array_key_exists('timeZone',$result['values'][0])) {
+    if (isset($result['values']) && array_key_exists('timezone', $result['values'][0])) {
       $timezone = $result['values'][0]['timezone'];
     }
 
     if ($eventInfoPageContext && $timezone != '_none' && !empty($timezone)) {
       // Add timezone besides the date data
-      $content = str_replace("</abbr>", " " . $timezone . " </abbr>", $content);
+      $timezone_val = explode(" ",$timezone,-1);
+      if(strpos($content, 'AM') !== false){
+        $content = str_replace("AM", " AM " .$timezone_val[0], $content);
+      }
+      if (strpos($content, 'PM') !== false) {
+        $content = str_replace("PM", " PM " .$timezone_val[0], $content);
+      }
     }
     elseif ($eventInfoFormContext) {
+      $result = civicrm_api3('Event', 'get', array(
+        'sequential' => 1,
+        'return' => array("timezone"),
+        'id' => $object->_id,
+      ));
       $timezone_identifiers = DateTimeZone::listIdentifiers();
       $timezone_field = '<tr class="crm-event-manage-eventinfo-form-block-timezone">
       <td class="label"><label for="timezone">Timezone</label></td>
       <td>
-      <select name="timezone" id="timezone" class="crm-form-select">
+      <select name="timezone" id="timezone" class="crm-select2">
       <option value="_none">Select Timezone</option>';
+      $defaultTz = $result['values'][0]['timezone'];
+
       foreach ($timezone_identifiers as $key => $value) {
         $dateTime = new DateTime();
         $dateTime->setTimeZone(new DateTimeZone($value));
         $timezone_db = $dateTime->format('T');
-        $timezone_field .= '<option value="' . $timezone_db . '">' . $value . '</option>';
+        $tzform = $timezone_db." ".$value;
+        if($defaultTz == $tzform) {
+          $timezone_field .= '<option value="' . $timezone_db . ' '.$value.'" selected>' . $value . '</option>';
+        }
+        else {
+          $timezone_field .= '<option value="' . $timezone_db . ' '.$value.'">' . $value . '</option>';
+        }
       }
       $timezone_field .= '</select>
       </td>
@@ -245,17 +264,18 @@ function eventtimezone_civicrm_alterContent(&$content, $context, $tplName, &$obj
 
     if ($timezone != '_none' && !empty($timezone && !empty($event_end_date))) {
       // Add timezone besides the date data
+      $timezone_val = explode(" ",$timezone,-1);
       if ($start_date == $end_date) {
-        $replacement = "<td width='90%'>" . $start_date_st . " " .  $timezone . " through " . $end_time . " " . $timezone . "</td>";
+        $replacement = "<td width='90%'>" . $start_date_st . " " .  $timezone_val[0] . " through " . $end_time . " " . $timezone_val[0] . "</td>";
         $content = preg_replace('#(<td width="90%">)(.*?)(</td>)#si', $replacement, $content);
       }
       else {
-        $replacement = "<td width='90%'>" . $start_date_st . " " .  $timezone . " through " . $end_date_st . " " . $timezone . "</td>";
+        $replacement = "<td width='90%'>" . $start_date_st . " " .  $timezone_val[0] . " through " . $end_date_st . " " . $timezone_val[0] . "</td>";
         $content = preg_replace('#(<td width="90%">)(.*?)(</td>)#si', $replacement, $content);
       }
     }
     elseif ($timezone != '_none' && !empty($timezone && empty($event_end_date))) {
-      $replacement = "<td width='90%'>" . $start_date_st . " " .  $timezone . "</td>";
+      $replacement = "<td width='90%'>" . $start_date_st . " " .  $timezone_val[0] . "</td>";
       $content = preg_replace('#(<td width="90%">)(.*?)(</td>)#si', $replacement, $content);
     }
   }
