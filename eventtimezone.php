@@ -197,7 +197,6 @@ function eventtimezone_civicrm_alterContent(&$content, $context, $tplName, &$obj
     $timezone = '';
     if (isset($result['values']) && array_key_exists('timezone', $result['values'][0])) {
       $timezone = $result['values'][0]['timezone'];
-    }
 
     if ($eventInfoPageContext && $timezone != '_none' && !empty($timezone)) {
       // Add timezone besides the date data
@@ -279,6 +278,7 @@ function eventtimezone_civicrm_alterContent(&$content, $context, $tplName, &$obj
       $content = preg_replace('#(<td width="90%">)(.*?)(</td>)#si', $replacement, $content);
     }
   }
+ }
 }
 
 /**
