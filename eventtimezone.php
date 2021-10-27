@@ -197,7 +197,7 @@ function eventtimezone_civicrm_alterContent(&$content, $context, $tplName, &$obj
     $timezone = '';
     if (isset($result['values']) && array_key_exists('timezone', $result['values'][0])) {
       $timezone = $result['values'][0]['timezone'];
-
+    }
     if ($eventInfoPageContext && $timezone != '_none' && !empty($timezone)) {
       // Add timezone besides the date data
       $timezone_val = explode(" ",$timezone,-1);
@@ -220,8 +220,10 @@ function eventtimezone_civicrm_alterContent(&$content, $context, $tplName, &$obj
       <td>
       <select name="timezone" id="timezone" class="crm-select2">
       <option value="_none">Select Timezone</option>';
-      $defaultTz = $result['values'][0]['timezone'];
-
+      $defaultTz = '';
+      if (isset($result['values']) && array_key_exists('timezone', $result['values'][0])) {
+        $defaultTz = $result['values'][0]['timezone'];
+      }
       foreach ($timezone_identifiers as $key => $value) {
         $dateTime = new DateTime();
         $dateTime->setTimeZone(new DateTimeZone($value));
@@ -240,45 +242,44 @@ function eventtimezone_civicrm_alterContent(&$content, $context, $tplName, &$obj
       <tr class="crm-event-manage-eventinfo-form-block-max_participants">';
       $content = str_replace('<tr class="crm-event-manage-eventinfo-form-block-max_participants">', $timezone_field, $content);
     }
-  }
-  elseif ($eventConfirmFormContext || $eventConfirmPageContext) {
-    $result = $result = civicrm_api3('Event', 'get', array(
-      'sequential' => 1,
-      'return' => array("start_date","end_date", "timezone"),
-      'id' => $object->_eventId,
-    ));
-    $event_start_date = $result['values'][0]['event_start_date'];
-    $event_end_date = $result['values'][0]['event_end_date'];
-    $timezone = $result['values'][0]['timezone'];
-    $start_date_con = new DateTime($event_start_date);
-    $start_date_st = date_format($start_date_con, 'F jS, Y g:iA');
-    $start_date = date_format($start_date_con, 'F jS');
+    elseif ($eventConfirmFormContext || $eventConfirmPageContext) {
+      $result = $result = civicrm_api3('Event', 'get', array(
+        'sequential' => 1,
+        'return' => array("start_date","end_date", "timezone"),
+        'id' => $object->_eventId,
+      ));
+      $event_start_date = $result['values'][0]['event_start_date'];
+      $event_end_date = $result['values'][0]['event_end_date'];
+      $timezone = $result['values'][0]['timezone'];
+      $start_date_con = new DateTime($event_start_date);
+      $start_date_st = date_format($start_date_con, 'F jS, Y g:iA');
+      $start_date = date_format($start_date_con, 'F jS');
 
-    $end_date_con = new DateTime($event_end_date);
-    $end_date_st = date_format($end_date_con, 'F jS, Y g:iA');
-    $end_date = date_format($end_date_con, 'F jS');
+      $end_date_con = new DateTime($event_end_date);
+      $end_date_st = date_format($end_date_con, 'F jS, Y g:iA');
+      $end_date = date_format($end_date_con, 'F jS');
 
-    $end_date_time = new DateTime($event_end_date);
-    $end_time = date_format($end_date_time, 'g:iA');
+      $end_date_time = new DateTime($event_end_date);
+      $end_time = date_format($end_date_time, 'g:iA');
 
-    if ($timezone != '_none' && !empty($timezone && !empty($event_end_date))) {
-      // Add timezone besides the date data
-      $timezone_val = explode(" ",$timezone,-1);
-      if ($start_date == $end_date) {
-        $replacement = "<td width='90%'>" . $start_date_st . " " .  $timezone_val[0] . " through " . $end_time . " " . $timezone_val[0] . "</td>";
-        $content = preg_replace('#(<td width="90%">)(.*?)(</td>)#si', $replacement, $content);
+      if ($timezone != '_none' && !empty($timezone && !empty($event_end_date))) {
+        // Add timezone besides the date data
+        $timezone_val = explode(" ",$timezone,-1);
+        if ($start_date == $end_date) {
+          $replacement = "<td width='90%'>" . $start_date_st . " " .  $timezone_val[0] . " through " . $end_time . " " . $timezone_val[0] . "</td>";
+          $content = preg_replace('#(<td width="90%">)(.*?)(</td>)#si', $replacement, $content);
+        }
+        else {
+          $replacement = "<td width='90%'>" . $start_date_st . " " .  $timezone_val[0] . " through " . $end_date_st . " " . $timezone_val[0] . "</td>";
+          $content = preg_replace('#(<td width="90%">)(.*?)(</td>)#si', $replacement, $content);
+        }
       }
-      else {
-        $replacement = "<td width='90%'>" . $start_date_st . " " .  $timezone_val[0] . " through " . $end_date_st . " " . $timezone_val[0] . "</td>";
+      elseif ($timezone != '_none' && !empty($timezone && empty($event_end_date))) {
+        $replacement = "<td width='90%'>" . $start_date_st . " " .  $timezone_val[0] . "</td>";
         $content = preg_replace('#(<td width="90%">)(.*?)(</td>)#si', $replacement, $content);
       }
     }
-    elseif ($timezone != '_none' && !empty($timezone && empty($event_end_date))) {
-      $replacement = "<td width='90%'>" . $start_date_st . " " .  $timezone_val[0] . "</td>";
-      $content = preg_replace('#(<td width="90%">)(.*?)(</td>)#si', $replacement, $content);
-    }
   }
- }
 }
 
 /**
