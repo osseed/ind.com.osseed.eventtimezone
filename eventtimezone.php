@@ -130,14 +130,16 @@ function eventtimezone_civicrm_postProcess($formName, &$form) {
   if ($formName == 'CRM_Event_Form_ManageEvent_EventInfo') {
     $submit =  $form->getVar('_submitValues');
     $timezone = $submit['timezone'];
+
     if (empty($form->_id) && !empty($submit['timezone'])) {
-      $result = civicrm_api3('Event', 'get', array(
+      $result = civicrm_api3('Event', 'get', [
         'sequential' => 1,
-        'return' => array("id"),
+        'return' => ['id'],
         'title' => $submit['title'],
         'event_type_id' => $submit['event_type_id'],
         'default_role_id' => $submit['default_role_id'],
-      ));
+      ]);
+
       if ($result['count'] == 1) {
         $event_id = $result['values'][0]['id'];
         $query = "
@@ -150,11 +152,7 @@ function eventtimezone_civicrm_postProcess($formName, &$form) {
     }
     else {
       $event_id = $form->_id;
-      $query = "
-      UPDATE civicrm_event
-      SET timezone = '$timezone'
-      WHERE id = $event_id
-      ";
+      $query = "UPDATE civicrm_event SET timezone = '$timezone' WHERE id = $event_id";
       CRM_Core_DAO::executeQuery($query);
     }
   }
@@ -189,18 +187,20 @@ function eventtimezone_civicrm_alterContent(&$content, $context, $tplName, &$obj
   $eventConfirmPageContext = ($context == 'form' && $tplName == 'CRM/Event/Form/Registration/ThankYou.tpl');
 
   if ($eventInfoFormContext || $eventInfoPageContext) {
-    $result = civicrm_api3('Event', 'get', array(
+    $result = civicrm_api3('Event', 'get', [
       'sequential' => 1,
-      'return' => array("timezone"),
+      'return' => ['timezone'],
       'id' => $object->_id,
-    ));
+    ]);
+
     $timezone = '';
     if (isset($result['values']) && array_key_exists('timezone', $result['values'][0])) {
       $timezone = $result['values'][0]['timezone'];
+    }
 
     if ($eventInfoPageContext && $timezone != '_none' && !empty($timezone)) {
       // Add timezone besides the date data
-      $timezone_val = explode(" ",$timezone,-1);
+      $timezone_val = explode(" ", $timezone, -1);
       if(strpos($content, 'AM') !== false){
         $content = str_replace("AM", " AM " .$timezone_val[0], $content);
       }
@@ -209,18 +209,34 @@ function eventtimezone_civicrm_alterContent(&$content, $context, $tplName, &$obj
       }
     }
     elseif ($eventInfoFormContext) {
-      $result = civicrm_api3('Event', 'get', array(
+      $result = civicrm_api3('Event', 'get', [
         'sequential' => 1,
-        'return' => array("timezone"),
+        'return' => ['timezone'],
         'id' => $object->_id,
-      ));
+      ]);
+
+      $defaultTz = $result['values'][0]['timezone'] ?? NULL;
       $timezone_identifiers = DateTimeZone::listIdentifiers();
       $timezone_field = '<tr class="crm-event-manage-eventinfo-form-block-timezone">
       <td class="label"><label for="timezone">Timezone</label></td>
       <td>
       <select name="timezone" id="timezone" class="crm-select2">
       <option value="_none">Select Timezone</option>';
-      $defaultTz = $result['values'][0]['timezone'];
+
+      // Get selected event template id.
+      $pattern = "/template_id=\d*/i";
+      preg_match($pattern, $content, $matches);
+      $matches = reset($matches);
+      $template_id = explode('=', $matches)[1] ?? FALSE;
+      $tpl_timezone = '';
+      // Get timezone from template id.
+      if ($template_id) {
+        $event = civicrm_api3('Event', 'getsingle', [
+          'return' => ['timezone'],
+          'id' => $template_id,
+        ]);
+        $tpl_timezone = ($event['is_error']) ? FALSE : $event['timezone'];
+      }
 
       foreach ($timezone_identifiers as $key => $value) {
         $dateTime = new DateTime();
@@ -232,6 +248,10 @@ function eventtimezone_civicrm_alterContent(&$content, $context, $tplName, &$obj
         }
         else {
           $timezone_field .= '<option value="' . $timezone_db . ' '.$value.'">' . $value . '</option>';
+          // Select existing timezone for event template.
+          if($tpl_timezone == $tzform) {
+            $timezone_field .= '<option value="' . $timezone_db . ' '.$value.'" selected>' . $value . '</option>';
+          }
         }
       }
       $timezone_field .= '</select>
@@ -242,11 +262,12 @@ function eventtimezone_civicrm_alterContent(&$content, $context, $tplName, &$obj
     }
   }
   elseif ($eventConfirmFormContext || $eventConfirmPageContext) {
-    $result = $result = civicrm_api3('Event', 'get', array(
+    $result = civicrm_api3('Event', 'get', [
       'sequential' => 1,
-      'return' => array("start_date","end_date", "timezone"),
+      'return' => ['start_date','end_date', 'timezone'],
       'id' => $object->_eventId,
-    ));
+    ]);
+
     $event_start_date = $result['values'][0]['event_start_date'];
     $event_end_date = $result['values'][0]['event_end_date'];
     $timezone = $result['values'][0]['timezone'];
@@ -260,10 +281,21 @@ function eventtimezone_civicrm_alterContent(&$content, $context, $tplName, &$obj
 
     $end_date_time = new DateTime($event_end_date);
     $end_time = date_format($end_date_time, 'g:iA');
+    // new to no end date
+    if ($timezone != '_none' && !empty($timezone)) {
+      // Add timezone besides the date data
+      $timezone_val = explode(" ", $timezone, -1);
+      if(strpos($content, 'AM') !== false){
+        $content = str_replace("AM", " AM " .$timezone_val[0], $content);
+      }
+      if (strpos($content, 'PM') !== false) {
+        $content = str_replace("PM", " PM " .$timezone_val[0], $content);
+      }
+    }
 
     if ($timezone != '_none' && !empty($timezone && !empty($event_end_date))) {
       // Add timezone besides the date data
-      $timezone_val = explode(" ",$timezone,-1);
+      $timezone_val = explode(" ", $timezone, -1);
       if ($start_date == $end_date) {
         $replacement = "<td width='90%'>" . $start_date_st . " " .  $timezone_val[0] . " through " . $end_time . " " . $timezone_val[0] . "</td>";
         $content = preg_replace('#(<td width="90%">)(.*?)(</td>)#si', $replacement, $content);
@@ -278,7 +310,6 @@ function eventtimezone_civicrm_alterContent(&$content, $context, $tplName, &$obj
       $content = preg_replace('#(<td width="90%">)(.*?)(</td>)#si', $replacement, $content);
     }
   }
- }
 }
 
 /**
@@ -303,14 +334,14 @@ function eventtimezone_civicrm_tokenValues(&$values, &$cids, $job = null, $token
   foreach ($cids as $cidkey => $cidvalue) {
     $result = civicrm_api3('Participant', 'get', [
       'sequential' => 1,
-      'return' => ["event_id"],
+      'return' => ['event_id'],
       'contact_id' => $cidvalue,
     ]);
 
     foreach ($result['values'] as $resultvalue) {
       $event_result = civicrm_api3('Event', 'get', [
         'sequential' => 1,
-        'return' => ["timezone", "start_date", "end_date"],
+        'return' => ['timezone', 'start_date', 'end_date'],
         'id' => $resultvalue['event_id'],
       ]);
     }
