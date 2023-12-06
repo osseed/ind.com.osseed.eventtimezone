@@ -130,25 +130,33 @@ function eventtimezone_civicrm_alterContent(&$content, $context, $tplName, &$obj
   $eventConfirmPageContext = ($context == 'form' && $tplName == 'CRM/Event/Form/Registration/ThankYou.tpl');
 
   if ($eventInfoFormContext || $eventInfoPageContext) {
-    $result = civicrm_api3('Event', 'get', [
-      'sequential' => 1,
-      'return' => ['timezone'],
-      'id' => $object->_id,
-    ]);
+    if ($eventInfoPageContext) {
+      $result = civicrm_api3('Event', 'get', [
+        'sequential' => 1,
+        'return' => ['timezone'],
+        'id' => $object->_id,
+      ]);
 
-    $timezone = '';
-    if (isset($result['values']) && array_key_exists('timezone', $result['values'][0])) {
-      $timezone = $result['values'][0]['timezone'];
-    }
+      $timezone = '';
+      if (isset($result['values']) && array_key_exists('timezone', $result['values'][0])) {
+        $timezone = $result['values'][0]['timezone'];
+      }
 
-    if ($eventInfoPageContext && $timezone != '_none' && !empty($timezone)) {
       // Add timezone besides the date data
       $timezone_val = explode(" ", $timezone, -1);
+      $start_time_regex = '/from&nbsp;\s*\d+:\d{2}/';
       if(strpos($content, 'AM') !== false){
         $content = str_replace("AM", " AM " .$timezone_val[0], $content);
       }
+      elseif(preg_match($start_time_regex, $content, $starttime)) {
+        $content = preg_replace($start_time_regex, $starttime[0] . " " . $timezone_val[0], $content);
+      }
+      $end_time_regex = '/to&nbsp;\s*\d+:\d{2}/';
       if (strpos($content, 'PM') !== false) {
         $content = str_replace("PM", " PM " .$timezone_val[0], $content);
+      }
+      elseif(preg_match($end_time_regex, $content, $endtime)) {
+        $content = preg_replace($end_time_regex, $endtime[0] . " " . $timezone_val[0], $content);
       }
     }
     elseif ($eventInfoFormContext) {
