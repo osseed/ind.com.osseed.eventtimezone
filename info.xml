@@ -10,10 +10,10 @@
   </maintainer>
   <urls>
     <url desc="Main Extension Page">https://github.com/osseed/ind.com.osseed.eventtimezone.git</url>
-    <url desc="Documentation">https://github.com/osseed/ind.com.osseed.eventtimezone/blob/master/README.txt</url>
+    <url desc="Documentation">https://github.com/osseed/ind.com.osseed.eventtimezone/blob/master/README.md</url>
   </urls>
   <releaseDate>2020-11-02</releaseDate>
-  <version>1.1</version>
+  <version>1.2</version>
   <develStage>alpha</develStage>
   <compatibility>
     <ver>4.7</ver>
@@ -22,5 +22,10 @@
   <comments>Show timezones list while creating events</comments>
   <civix>
     <namespace>CRM/Eventtimezone</namespace>
+    <format>22.05.2</format>
   </civix>
+  <mixins>
+    <mixin>mgd-php@1.0.0</mixin>
+    <mixin>setting-php@1.0.0</mixin>
+  </mixins>
 </extension>
