@@ -16,16 +16,20 @@
   <version>1.2</version>
   <develStage>alpha</develStage>
   <compatibility>
-    <ver>4.7</ver>
-    <ver>5.29</ver>
+    <ver>5.38</ver>
   </compatibility>
   <comments>Show timezones list while creating events</comments>
   <civix>
     <namespace>CRM/Eventtimezone</namespace>
-    <format>22.05.2</format>
+    <format>23.02.1</format>
   </civix>
   <mixins>
     <mixin>mgd-php@1.0.0</mixin>
     <mixin>setting-php@1.0.0</mixin>
   </mixins>
+  <classloader>
+    <psr0 prefix="CRM_" path="."/>
+    <psr4 prefix="Civi\" path="Civi"/>
+  </classloader>
+  <upgrader>CRM_Eventtimezone_Upgrader</upgrader>
 </extension>
