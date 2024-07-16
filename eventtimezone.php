@@ -66,7 +66,7 @@ function eventtimezone_civicrm_postProcess($formName, &$form) {
 }
 
 /**
- * Implements hook_civicrm_apiWrappers().
+ * Implements hook_civicrm_entityTypes().
  */
 function eventtimezone_civicrm_entityTypes(&$entityTypes) {
   $entityTypes['Event']['fields_callback'][] = function ($class, &$fields) {
