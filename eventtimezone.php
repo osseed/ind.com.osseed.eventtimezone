@@ -98,7 +98,7 @@ function eventtimezone_civicrm_alterContent(&$content, $context, $tplName, &$obj
       $result = civicrm_api3('Event', 'get', [
         'sequential' => 1,
         'return' => ['timezone'],
-        'id' => $object->_id,
+        'id' => $_GET["id"] ?? $object->_id,
       ]);
 
       $timezone = '';
