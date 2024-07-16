@@ -35,7 +35,7 @@ function eventtimezone_civicrm_enable() {
  */
 function eventtimezone_civicrm_postProcess($formName, &$form) {
   if ($formName == 'CRM_Event_Form_ManageEvent_EventInfo') {
-    $submit =  $form->getVar('_submitValues');
+    $submit = $form->getVar('_submitValues');
     $timezone = $submit['timezone'];
 
     if (empty($form->_id) && !empty($submit['timezone'])) {
@@ -109,17 +109,17 @@ function eventtimezone_civicrm_alterContent(&$content, $context, $tplName, &$obj
       // Add timezone besides the date data
       $timezone_val = explode(" ", $timezone, -1);
       $start_time_regex = '/from&nbsp;\s*\d+:\d{2}/';
-      if(strpos($content, 'AM') !== false){
-        $content = str_replace("AM", " AM " .$timezone_val[0], $content);
+      if (strpos($content, 'AM') !== false) {
+        $content = str_replace("AM", " AM " . $timezone_val[0], $content);
       }
-      elseif(preg_match($start_time_regex, $content, $starttime)) {
+      elseif (preg_match($start_time_regex, $content, $starttime)) {
         $content = preg_replace($start_time_regex, $starttime[0] . " " . $timezone_val[0], $content);
       }
       $end_time_regex = '/to&nbsp;\s*\d+:\d{2}/';
       if (strpos($content, 'PM') !== false) {
-        $content = str_replace("PM", " PM " .$timezone_val[0], $content);
+        $content = str_replace("PM", " PM " . $timezone_val[0], $content);
       }
-      elseif(preg_match($end_time_regex, $content, $endtime)) {
+      elseif (preg_match($end_time_regex, $content, $endtime)) {
         $content = preg_replace($end_time_regex, $endtime[0] . " " . $timezone_val[0], $content);
       }
     }
@@ -157,15 +157,15 @@ function eventtimezone_civicrm_alterContent(&$content, $context, $tplName, &$obj
         $dateTime = new DateTime();
         $dateTime->setTimeZone(new DateTimeZone($value));
         $timezone_db = $dateTime->format('T');
-        $tzform = $timezone_db." ".$value;
-        if($defaultTz == $tzform) {
-          $timezone_field .= '<option value="' . $timezone_db . ' '.$value.'" selected>' . $value . '</option>';
+        $tzform = $timezone_db . " " . $value;
+        if ($defaultTz == $tzform) {
+          $timezone_field .= '<option value="' . $timezone_db . ' ' . $value . '" selected>' . $value . '</option>';
         }
         else {
-          $timezone_field .= '<option value="' . $timezone_db . ' '.$value.'">' . $value . '</option>';
+          $timezone_field .= '<option value="' . $timezone_db . ' ' . $value . '">' . $value . '</option>';
           // Select existing timezone for event template.
-          if($tpl_timezone == $tzform) {
-            $timezone_field .= '<option value="' . $timezone_db . ' '.$value.'" selected>' . $value . '</option>';
+          if ($tpl_timezone == $tzform) {
+            $timezone_field .= '<option value="' . $timezone_db . ' ' . $value . '" selected>' . $value . '</option>';
           }
         }
       }
@@ -179,7 +179,7 @@ function eventtimezone_civicrm_alterContent(&$content, $context, $tplName, &$obj
   elseif ($eventConfirmFormContext || $eventConfirmPageContext) {
     $result = civicrm_api3('Event', 'get', [
       'sequential' => 1,
-      'return' => ['start_date','end_date', 'timezone'],
+      'return' => ['start_date', 'end_date', 'timezone'],
       'id' => $object->_eventId,
     ]);
 
@@ -200,11 +200,11 @@ function eventtimezone_civicrm_alterContent(&$content, $context, $tplName, &$obj
     if ($timezone != '_none' && !empty($timezone)) {
       // Add timezone besides the date data
       $timezone_val = explode(" ", $timezone, -1);
-      if(strpos($content, 'AM') !== false){
-        $content = str_replace("AM", " AM " .$timezone_val[0], $content);
+      if (strpos($content, 'AM') !== false) {
+        $content = str_replace("AM", " AM " . $timezone_val[0], $content);
       }
       if (strpos($content, 'PM') !== false) {
-        $content = str_replace("PM", " PM " .$timezone_val[0], $content);
+        $content = str_replace("PM", " PM " . $timezone_val[0], $content);
       }
     }
 
@@ -212,16 +212,16 @@ function eventtimezone_civicrm_alterContent(&$content, $context, $tplName, &$obj
       // Add timezone besides the date data
       $timezone_val = explode(" ", $timezone, -1);
       if ($start_date == $end_date) {
-        $replacement = "<td width='90%'>" . $start_date_st . " " .  $timezone_val[0] . " through " . $end_time . " " . $timezone_val[0] . "</td>";
+        $replacement = "<td width='90%'>" . $start_date_st . " " . $timezone_val[0] . " through " . $end_time . " " . $timezone_val[0] . "</td>";
         $content = preg_replace('#(<td width="90%">)(.*?)(</td>)#si', $replacement, $content);
       }
       else {
-        $replacement = "<td width='90%'>" . $start_date_st . " " .  $timezone_val[0] . " through " . $end_date_st . " " . $timezone_val[0] . "</td>";
+        $replacement = "<td width='90%'>" . $start_date_st . " " . $timezone_val[0] . " through " . $end_date_st . " " . $timezone_val[0] . "</td>";
         $content = preg_replace('#(<td width="90%">)(.*?)(</td>)#si', $replacement, $content);
       }
     }
     elseif ($timezone != '_none' && !empty($timezone && empty($event_end_date))) {
-      $replacement = "<td width='90%'>" . $start_date_st . " " .  $timezone_val[0] . "</td>";
+      $replacement = "<td width='90%'>" . $start_date_st . " " . $timezone_val[0] . "</td>";
       $content = preg_replace('#(<td width="90%">)(.*?)(</td>)#si', $replacement, $content);
     }
   }
@@ -230,7 +230,7 @@ function eventtimezone_civicrm_alterContent(&$content, $context, $tplName, &$obj
 /**
  * Implements hook_civicrm_tokens().
  */
-function eventtimezone_civicrm_tokens( &$tokens ) {
+function eventtimezone_civicrm_tokens(&$tokens) {
   $tokens['timezone'] = array(
     'timezone.start_date_timezone' => ts('Event Start Date with timezone'),
     'timezone.end_date_timezone' => ts('Event End Date with timezone'),
@@ -278,12 +278,3 @@ function eventtimezone_civicrm_tokenValues(&$values, &$cids, $job = null, $token
     }
   }
 }
-
-// /**
-//  * Implements hook_civicrm_entityTypes().
-//  *
-//  * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_entityTypes
-//  */
-// function eventtimezone_civicrm_entityTypes(&$entityTypes) {
-//   _eventtimezone_civix_civicrm_entityTypes($entityTypes);
-// }
