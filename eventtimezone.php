@@ -69,19 +69,18 @@ function eventtimezone_civicrm_postProcess($formName, &$form) {
  * Implements hook_civicrm_apiWrappers().
  */
 function eventtimezone_civicrm_entityTypes(&$entityTypes) {
-  $entityTypes['CRM_Event_DAO_Event']['fields_callback'][]
-    = function ($class, &$fields) {
-      $fields['timezone'] = array(
-         'name' => 'timezone',
-         'type' => CRM_Utils_Type::T_INT,
-         'title' => ts('Timezone') ,
-         'description' => 'Event Timezone',
-         'table_name' => 'civicrm_event',
-         'entity' => 'Event',
-         'bao' => 'CRM_Event_BAO_Event',
-         'localizable' => 0,
-       );
-    };
+  $entityTypes['Event']['fields_callback'][] = function ($class, &$fields) {
+    $fields['timezone'] = [
+      'name' => 'timezone',
+      'type' => CRM_Utils_Type::T_INT,
+      'title' => ts('Timezone') ,
+      'description' => 'Event Timezone',
+      'table_name' => 'civicrm_event',
+      'entity' => 'Event',
+      'bao' => 'CRM_Event_BAO_Event',
+      'localizable' => 0,
+    ];
+  };
 }
 
 /**
